@@ -1,5 +1,16 @@
 apply plugin: "groovy"
 apply plugin: "idea"
+apply plugin: 'cucumber'
+
+buildscript {
+  repositories {
+    jcenter()
+    mavenCentral()
+  } 
+  dependencies {
+      classpath 'com.github.samueltbrown:gradle-cucumber-plugin:0.6'
+  }
+}
 
 repositories {
     jcenter()
@@ -13,8 +24,9 @@ dependencies {
     def seleniumVersion = "2.41.0"
 
     // If using Spock, need to depend on geb-spock
+    //testRuntime "org.codehaus.groovy:groovy-all:2.2.0"
     testCompile "org.gebish:geb-spock:$gebVersion"
-    testCompile "org.spockframework:spock-core:0.7-groovy-2.0"
+    testCompile "org.spockframework:spock-core:0.7-groovy-1.8"// -groovy-2.0 
 
     // If using JUnit, need to depend on geb-junit (3 or 4)
     testCompile "org.gebish:geb-junit4:$gebVersion"
@@ -22,6 +34,12 @@ dependencies {
     // Drivers
     drivers.each { driver ->
         testCompile "org.seleniumhq.selenium:selenium-$driver-driver:$seleniumVersion"
+    }
+
+
+    
+    
+    cucumberCompile('info.cukes:cucumber-groovy:1.1.6'){
     }
 }
 
@@ -43,4 +61,14 @@ drivers.each { driver ->
 test {
 	dependsOn drivers.collect { tasks["${it}Test"] }
 	enabled = false
+}
+
+cucumber {
+    formats = ['pretty','json:build/cucumber.json','junit:build/cucumber.xml']
+    glueDirs = ['src/cucumber/resources/env',
+                'src/cucumber/resources/support']
+    featureDirs = ['src/cucumber/resources/features']
+    monochrome = false
+    strict = false
+    dryRun = false
 }
